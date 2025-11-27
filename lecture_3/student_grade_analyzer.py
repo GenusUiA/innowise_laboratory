@@ -19,10 +19,10 @@ if __name__ == "__main__":
         print("4. Find the top student")
         print("5. Exit program")
         
-        try:
+        try:  # checking for options
             option = int(input("Enter your choise: "))
         except Exception as e:
-            print(f"{e}, enter a number")
+            print("Enter a number")
             continue
             
         if option == 1:
@@ -36,10 +36,12 @@ if __name__ == "__main__":
             else:
                 students.append(student)
         elif option == 2:
+            flag = False
             try: 
                 name = str(input("Enter student name: ")).capitalize()
                 for student in students:
                     if name in student["name"]:
+                        flag = True
                         while True:
                             grade = input("Enter a grade (or 'done' to finish): ")
                             if grade == 'done':
@@ -52,6 +54,8 @@ if __name__ == "__main__":
                                     student["grades"].append(grade)
                             except:
                                 print("Enter the grade from 0 to 100")
+                if flag == False:
+                    print("Student not in the list") 
             except Exception as e:
                 print("Enter your real name")
             
@@ -60,25 +64,32 @@ if __name__ == "__main__":
             count = 0
             averages = []
             for student in students:
-                for grades in student["grades"]:
-                    for grade in grades:
+                if student["grades"]:
+                    for grade in student["grades"]:
                         sum_avg += int(grade)
                         count += 1
-                if count == 0:
-                    average = 'N/A'
-                else: 
-                    average = sum_avg / count
-                    averages.append(average)
-                count = 0
-                print(f"{name}'s average grade is {average}")
-            print("--------------------------")
-            print(f"Max Average: {max(averages)}")
-            print(f"Min Average: {min(averages)}")
-            print(f"Overall Average: {sum(averages) / len(averages)}")
-        # elif option == 4:
-        #     avg = lambda students["grades"]: sum(grades)/len(grades)
-        #     top_student = max(students, key = lambda s: avg(s["grades"]))
-        #     print(f"The student with the highest average is {top_student["name"]} with a grade of {avg(top_student["grades"])}")
+                    if count == 0:
+                        average = 'N/A'
+                    else: 
+                        average = round(sum_avg / count, 1)
+                        averages.append(average)
+                    count = 0
+                    print(f"{name}'s average grade is {average}")
+            if averages:
+                print("--------------------------")
+                print(f"Max Average: {max(averages)}")
+                print(f"Min Average: {min(averages)}")
+                print(f"Overall Average: {sum(averages) / len(averages)}")
+            else: 
+                print("There is no students with the grades")
+        elif option == 4:
+            if not students:
+                print("No students in list")
+                continue
+            
+            avg = lambda students: Avg([int(grade) for grade in students["grades"]]) if students["grades"] else 0 
+            top_student = max(students, key = avg)
+            print(f"The student with the highest average is {top_student["name"]} with a grade of {round(avg(top_student),1)}")
                 
         elif option == 5:
             break
