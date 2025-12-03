@@ -86,7 +86,7 @@ SELECT students.full_name, AVG(grade) AS avg_grade FROM grades
     LIMIT 3;
 
 -- 8.Show all students who have scored below 80 in any subject
-SELECT full_name FROM students
+SELECT DISTINCT full_name FROM students
     JOIN grades 
     ON grades.student_id = students.id
     WHERE grade < 80;
