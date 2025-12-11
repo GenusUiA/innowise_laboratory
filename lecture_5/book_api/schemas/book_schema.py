@@ -7,6 +7,7 @@ class BookValid(BaseModel):
     author: str
     year: Optional[int] = Field(None, ge=1, le=9999)
     
+#schema for output books
 class BookOut(BaseModel):
     id: int
     title: str
