@@ -1,7 +1,6 @@
 from typing import Optional
-from fastapi import Body, Depends, FastAPI, Query 
+from fastapi import Depends, FastAPI
 from fastapi.responses import JSONResponse
-from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from database import *
 from pydantic import BaseModel
@@ -73,10 +72,11 @@ def search_books_by_parameters(title:str | None = None,
                                year:int | None = None, 
                                db: Session = Depends(get_db)):
     '''Search books by parameters'''
-    if title != None:
-        book = db.query(Book).filter(Book.title.ilike(f"%{title}%")).all()
-    elif author != None:
-        book = db.query(Book).filter(Book.author.ilike(f"%{author}")).all()
-    elif year != None:
-        book = db.query(Book).filter(Book.year.ilike(f"%{year}")).all()
-    return book  
+    book = db.query(Book)
+    if title:
+        book = book.filter(Book.title.ilike(f"%{title}%"))
+    if author:
+        book = book.filter(Book.author.ilike(f"%{author}%"))
+    if year:
+        book = book.filter(Book.year == year)
+    return book.all()
