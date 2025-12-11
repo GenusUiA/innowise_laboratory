@@ -1,21 +1,14 @@
-from typing import Optional
-from fastapi import Depends, FastAPI
-from fastapi.responses import JSONResponse
+from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
 from database import *
-from pydantic import BaseModel
+from models.book_model import *
+from schemas.book_schema import BookOut, BookValid
 
 # Create the table
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-# schema for validate books
-class BookValid(BaseModel):
-    title: str 
-    author: str
-    year: Optional[int] = None
-    
 # Create dependency to connect with database
 def get_db():
     db = SessionLocal()
@@ -24,7 +17,7 @@ def get_db():
     finally:
         db.close()
 
-@app.post("/books/")
+@app.post("/books/", response_model=BookOut, status_code=201)
 def add_a_new_book(data: BookValid, db: Session = Depends(get_db)):
     '''Add a new book'''
     book = Book(
@@ -36,29 +29,28 @@ def add_a_new_book(data: BookValid, db: Session = Depends(get_db)):
     db.refresh(book)
     return book
 
-@app.get("/books/")
+@app.get("/books/", response_model=list[BookOut])
 def get_all_books(db: Session = Depends(get_db)):
     '''Get all books'''
     return db.query(Book).all()
 
-@app.delete("/books/{book_id}")
+@app.delete("/books/{book_id}", status_code=204)
 def delete_a_book_by_id(book_id: int, db: Session = Depends(get_db)):
     '''Delete book by id'''
     book = db.query(Book).filter(Book.id == book_id).first()
-    if book == None:
-        return JSONResponse(status_code=404, content={"message": "Book is not found"})
+    if not book:
+        raise HTTPException(status_code=404, detail="the book is not found")
     db.delete(book)
     db.commit()
-    return book
-    
-@app.put("/books/{book_id}")
+
+@app.put("/books/{book_id}", response_model=BookOut)
 def update_book_details(book_id: int, data: BookValid,  db: Session = Depends(get_db)):
     '''Update book by details'''
     
     book = db.query(Book).filter(Book.id == book_id).first()
     
     if book == None:
-        return JSONResponse(status_code=404, content={"message": "book is not found"})    
+        raise HTTPException(status_code=404, detail="book is not found")    
     book.title = data.title
     book.author = data.author
     book.year = data.year
@@ -66,7 +58,7 @@ def update_book_details(book_id: int, data: BookValid,  db: Session = Depends(ge
     db.refresh(book)
     return book
 
-@app.get("/books/search/")
+@app.get("/books/search/", response_model=list[BookOut])
 def search_books_by_parameters(title:str | None = None, 
                                author:str | None = None, 
                                year:int | None = None, 
