@@ -1,17 +1,20 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim
+# Official Python parent image
+FROM python:3.13.5-slim
 
-# Set the working directory in container
+# Set working directory in the container
 WORKDIR /lecture_6
 
 # Copy the current directory contents into the container at /lecture_6
-COPY . /lecture_6
+COPY ./app /lecture_6/app
 
-# Install any needed dependencies specified in requirements.txt
-RUN pip install --no-cache-dir --upgrade -r /lecture_6/requirements.txt
+# Copy dependencies to install them
+COPY ./requirements.txt /lecture_6/requirements.txt
 
-# Make port 8080 available to the world outside this container
-EXPOSE 8080
+# Install any needed dependencies
+RUN pip install --no-cache-dir -r /lecture_6/requirements.txt
 
-# Rum fastapi.py when the container launches
-CMD ["uvicorn", "fastapi_app:app","--host", "0.0.0.0", "--port", "8080"]
+# Make port 8000 available
+EXPOSE 8000
+
+# Run fastapi_app.py when the container launches
+CMD ["uvicorn", "app.fastapi_app:app", "--host", "0.0.0.0", "--port", "8000"]
