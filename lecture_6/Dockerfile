@@ -14,8 +14,9 @@ COPY ./requirements.txt /lecture_6/requirements.txt
 RUN pip install --no-cache-dir -r /lecture_6/requirements.txt
 
 # Install curl to check the query
-RUN apt-get update \ 
- && apt-get install -y curl
+RUN apt-get update \
+ && apt-get install -y curl \
+ && rm -rf /var/lib/apt/lists/*
 
 # Make port 8000 available
 EXPOSE 8000
